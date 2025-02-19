@@ -125,5 +125,15 @@ Index.css
     .form-container {
       width: 100%;
     }
+
+    .container, 
+    .form-container, 
+    .output-container, 
+    .input-group, 
+    .output-group,
+    .input-wrapper,
+    .output-wrapper {
+      gap: 4px;
+    }
   }
   
