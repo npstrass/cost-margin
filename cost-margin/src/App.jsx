@@ -1,15 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const FET_PERCENTAGE = 0.12;
 const PARTIAL_FET_INCREASE = 1.04;
-const USD_TO_CAD = 1.43;
-
-const currencyConversion = (amount, toCurrency, fromCurrency) => {
-  const number = Number(amount);
-  if (isNaN(number) || number <= 0) return 0;
-  if (toCurrency === fromCurrency) return number;
-  return toCurrency === "USD" ? number / USD_TO_CAD : number * USD_TO_CAD;
-};
 
 const round = (price) => (!price ? 0 : (Math.round(price / 10) * 10));
 const format = (value) => (!value ? "0.00" : Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
@@ -24,6 +16,32 @@ function App() {
     costCurrency: "USD",
     saleCurrency: "USD",
   });
+
+  const [rates, setRates] = useState({
+    CAD: null,
+    EUR: null
+  });
+
+  useEffect(() => {
+    fetch("https://api.frankfurter.dev/v1/latest?base=USD&symbols=CAD,EUR")
+      .then((response) => response.json())
+      .then((data) => {
+        setRates({
+          CAD: data.rates.CAD,
+          EUR: data.rates.EUR,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching the exchange rates:", error);
+      });
+  }, []);
+
+  const currencyConversion = (amount, toCurrency, fromCurrency) => {
+    const number = Number(amount);
+    if (isNaN(number) || number <= 0) return 0;
+    if (toCurrency === fromCurrency) return number;
+    return toCurrency === "USD" ? number / rates["CAD"] : number * rates["CAD"];
+  };
 
   const handleChange = (e) => setValues({ ...values, [e.target.name]: e.target.value });
   const reset = () => setValues({ sale: "", cost: "", margin: "", fetType: "none", partialFetAmount: "", costCurrency: "USD", saleCurrency: "USD" });
